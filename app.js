@@ -77,6 +77,156 @@ removeLogoBtn.addEventListener('click', () => {
 
 loadSellerInfo();
 
+// --- Clients enregistrés ---
+
+const clientNameInput = document.getElementById('clientName');
+const clientAddressInput = document.getElementById('clientAddress');
+const clientsListEl = document.getElementById('clients-list');
+
+const CLIENTS_STORAGE_KEY = 'generateurFactures.clients';
+
+function loadClients() {
+  try {
+    return JSON.parse(localStorage.getItem(CLIENTS_STORAGE_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function renderClientsList() {
+  const clients = loadClients();
+  clientsListEl.innerHTML = clients.map(c => `<option value="${escapeHtml(c.name)}">`).join('');
+}
+
+function saveClient(name, address) {
+  if (!name) return;
+  const clients = loadClients();
+  const existing = clients.find(c => c.name === name);
+  if (existing) {
+    existing.address = address;
+  } else {
+    clients.push({ name, address });
+  }
+  localStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(clients));
+  renderClientsList();
+}
+
+clientNameInput.addEventListener('input', () => {
+  const clients = loadClients();
+  const match = clients.find(c => c.name === clientNameInput.value);
+  if (match) {
+    clientAddressInput.value = match.address || '';
+  }
+});
+
+renderClientsList();
+
+// --- Numérotation automatique ---
+
+const docNumberInput = document.getElementById('docNumber');
+const docTypeRadios = document.querySelectorAll('input[name="docType"]');
+
+const COUNTERS_STORAGE_KEY = 'generateurFactures.counters';
+
+function loadCounters() {
+  try {
+    return JSON.parse(localStorage.getItem(COUNTERS_STORAGE_KEY)) || {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveCounters(counters) {
+  localStorage.setItem(COUNTERS_STORAGE_KEY, JSON.stringify(counters));
+}
+
+function docTypePrefix(docType) {
+  return docType === 'Facture' ? 'FAC' : 'DEV';
+}
+
+function suggestDocNumber() {
+  const docType = document.querySelector('input[name="docType"]:checked').value;
+  const counters = loadCounters();
+  const next = (counters[docType] || 0) + 1;
+  docNumberInput.value = `${docTypePrefix(docType)}-${String(next).padStart(4, '0')}`;
+}
+
+function incrementCounter(docType) {
+  const counters = loadCounters();
+  counters[docType] = (counters[docType] || 0) + 1;
+  saveCounters(counters);
+}
+
+docTypeRadios.forEach(radio => {
+  radio.addEventListener('change', suggestDocNumber);
+});
+
+suggestDocNumber();
+
+// --- Historique des documents générés ---
+
+const historyBody = document.getElementById('history-body');
+const historyTable = document.getElementById('history-table');
+const historyEmpty = document.getElementById('history-empty');
+const clearHistoryBtn = document.getElementById('clear-history');
+
+const HISTORY_STORAGE_KEY = 'generateurFactures.history';
+const MAX_HISTORY_ENTRIES = 50;
+
+function loadHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function renderHistory() {
+  const history = loadHistory();
+  if (history.length === 0) {
+    historyTable.classList.remove('has-rows');
+    historyEmpty.hidden = false;
+    historyBody.innerHTML = '';
+    return;
+  }
+  historyTable.classList.add('has-rows');
+  historyEmpty.hidden = true;
+  historyBody.innerHTML = history.map(entry => `
+    <tr>
+      <td>${escapeHtml(entry.docType)}</td>
+      <td>${escapeHtml(entry.docNumber)}</td>
+      <td>${escapeHtml(formatDate(entry.docDate))}</td>
+      <td>${escapeHtml(entry.clientName)}</td>
+      <td>${entry.totalTTC.toFixed(2)} €</td>
+    </tr>
+  `).join('');
+}
+
+function addHistoryEntry(entry) {
+  const history = loadHistory();
+  history.unshift(entry);
+  if (history.length > MAX_HISTORY_ENTRIES) {
+    history.length = MAX_HISTORY_ENTRIES;
+  }
+  localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+  renderHistory();
+}
+
+clearHistoryBtn.addEventListener('click', () => {
+  if (confirm('Effacer tout l\'historique des documents générés ?')) {
+    localStorage.removeItem(HISTORY_STORAGE_KEY);
+    renderHistory();
+  }
+});
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
+renderHistory();
+
 function createItemRow() {
   const row = document.createElement('tr');
   row.innerHTML = `
@@ -257,6 +407,12 @@ async function generatePDF() {
 
   const filename = `${docType}_${docNumber || 'sans-numero'}.pdf`;
   doc.save(filename);
+
+  // Mémorisation du client, du numéro suivant et ajout à l'historique
+  saveClient(clientName, clientAddress);
+  incrementCounter(docType);
+  addHistoryEntry({ docType, docNumber, docDate, clientName, totalTTC });
+  suggestDocNumber();
 }
 
 function formatDate(isoDate) {

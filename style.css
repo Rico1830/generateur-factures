@@ -142,6 +142,34 @@ button {
   background: #1d4ed8;
 }
 
+#history-section {
+  margin-top: 24px;
+  border-top: 1px solid #ddd;
+  padding-top: 16px;
+}
+
+#history-section h2 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+#history-table {
+  display: none;
+}
+
+#history-table.has-rows {
+  display: table;
+}
+
+#history-table th, #history-table td {
+  border-bottom: 1px solid #eee;
+}
+
+#clear-history {
+  background: #e0e0e0;
+  margin-top: 8px;
+}
+
 .remove-item {
   background: #ef4444;
   color: #fff;

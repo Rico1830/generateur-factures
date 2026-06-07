@@ -38,11 +38,13 @@
       <fieldset>
         <legend>Informations client</legend>
         <label>Nom du client
-          <input type="text" id="clientName" required>
+          <input type="text" id="clientName" list="clients-list" required>
+          <datalist id="clients-list"></datalist>
         </label>
         <label>Adresse du client
           <input type="text" id="clientAddress">
         </label>
+        <p class="hint">Astuce : choisis un client déjà enregistré dans la liste pour remplir son adresse automatiquement. Tout client utilisé est mémorisé pour la prochaine fois.</p>
       </fieldset>
 
       <fieldset>
@@ -89,6 +91,25 @@
 
       <button type="submit" id="generate-btn">Générer le PDF</button>
     </form>
+
+    <section id="history-section">
+      <h2>Historique des documents générés</h2>
+      <p class="hint">Conservé dans ton navigateur uniquement (pas envoyé sur internet).</p>
+      <table id="history-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Numéro</th>
+            <th>Date</th>
+            <th>Client</th>
+            <th>Total TTC</th>
+          </tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+      <p id="history-empty" class="hint">Aucun document généré pour l'instant.</p>
+      <button type="button" id="clear-history">Effacer l'historique</button>
+    </section>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
