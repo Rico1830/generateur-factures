@@ -3,6 +3,80 @@ const addItemBtn = document.getElementById('add-item');
 const form = document.getElementById('invoice-form');
 const vatRateInput = document.getElementById('vatRate');
 
+const sellerNameInput = document.getElementById('sellerName');
+const sellerAddressInput = document.getElementById('sellerAddress');
+const sellerSiretInput = document.getElementById('sellerSiret');
+const sellerLogoInput = document.getElementById('sellerLogo');
+const logoPreview = document.getElementById('logo-preview');
+const removeLogoBtn = document.getElementById('remove-logo');
+
+const SELLER_STORAGE_KEY = 'generateurFactures.seller';
+let sellerLogoDataUrl = null;
+
+function loadSellerInfo() {
+  const saved = localStorage.getItem(SELLER_STORAGE_KEY);
+  if (!saved) return;
+  try {
+    const data = JSON.parse(saved);
+    sellerNameInput.value = data.name || '';
+    sellerAddressInput.value = data.address || '';
+    sellerSiretInput.value = data.siret || '';
+    if (data.logo) {
+      sellerLogoDataUrl = data.logo;
+      showLogoPreview(data.logo);
+    }
+  } catch (e) {
+    // données corrompues, on ignore
+  }
+}
+
+function saveSellerInfo() {
+  const data = {
+    name: sellerNameInput.value,
+    address: sellerAddressInput.value,
+    siret: sellerSiretInput.value,
+    logo: sellerLogoDataUrl,
+  };
+  localStorage.setItem(SELLER_STORAGE_KEY, JSON.stringify(data));
+}
+
+function showLogoPreview(dataUrl) {
+  logoPreview.src = dataUrl;
+  logoPreview.hidden = false;
+  removeLogoBtn.hidden = false;
+}
+
+function hideLogoPreview() {
+  logoPreview.hidden = true;
+  logoPreview.removeAttribute('src');
+  removeLogoBtn.hidden = true;
+}
+
+[sellerNameInput, sellerAddressInput, sellerSiretInput].forEach(input => {
+  input.addEventListener('input', saveSellerInfo);
+});
+
+sellerLogoInput.addEventListener('change', () => {
+  const file = sellerLogoInput.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    sellerLogoDataUrl = reader.result;
+    showLogoPreview(sellerLogoDataUrl);
+    saveSellerInfo();
+  };
+  reader.readAsDataURL(file);
+});
+
+removeLogoBtn.addEventListener('click', () => {
+  sellerLogoDataUrl = null;
+  sellerLogoInput.value = '';
+  hideLogoPreview();
+  saveSellerInfo();
+});
+
+loadSellerInfo();
+
 function createItemRow() {
   const row = document.createElement('tr');
   row.innerHTML = `
@@ -66,7 +140,23 @@ form.addEventListener('submit', (e) => {
   generatePDF();
 });
 
-function generatePDF() {
+function getImageDimensions(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+
+// Calcule la taille du logo dans le PDF en respectant ses proportions,
+// en le faisant tenir dans un cadre maximal de maxWidth x maxHeight (mm).
+function fitInBox(naturalWidth, naturalHeight, maxWidth, maxHeight) {
+  const ratio = Math.min(maxWidth / naturalWidth, maxHeight / naturalHeight);
+  return { width: naturalWidth * ratio, height: naturalHeight * ratio };
+}
+
+async function generatePDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
@@ -84,6 +174,21 @@ function generatePDF() {
 
   let y = 20;
   const left = 15;
+
+  // Logo (en haut à droite), redimensionné en conservant ses proportions
+  if (sellerLogoDataUrl) {
+    try {
+      const dims = await getImageDimensions(sellerLogoDataUrl);
+      if (dims) {
+        const { width, height } = fitInBox(dims.width, dims.height, 45, 25);
+        const format = sellerLogoDataUrl.includes('image/png') ? 'PNG' : 'JPEG';
+        const x = 195 - width;
+        doc.addImage(sellerLogoDataUrl, format, x, 12, width, height, undefined, 'FAST');
+      }
+    } catch (e) {
+      // image illisible, on l'ignore simplement
+    }
+  }
 
   // Titre
   doc.setFontSize(18);

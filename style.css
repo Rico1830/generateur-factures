@@ -85,6 +85,22 @@ td input {
   border-radius: 4px;
 }
 
+#logo-preview {
+  max-width: 150px;
+  max-height: 80px;
+  display: block;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+#remove-logo {
+  background: #ef4444;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
 .hint {
   font-size: 0.8rem;
   color: #666;
