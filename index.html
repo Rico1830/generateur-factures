@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Générateur de devis et factures</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Générateur de devis / factures</h1>
+
+    <form id="invoice-form">
+      <fieldset>
+        <legend>Type de document</legend>
+        <label><input type="radio" name="docType" value="Devis" checked> Devis</label>
+        <label><input type="radio" name="docType" value="Facture"> Facture</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Vos informations</legend>
+        <label>Nom / Raison sociale
+          <input type="text" id="sellerName" required>
+        </label>
+        <label>Adresse
+          <input type="text" id="sellerAddress">
+        </label>
+        <label>SIRET
+          <input type="text" id="sellerSiret">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Informations client</legend>
+        <label>Nom du client
+          <input type="text" id="clientName" required>
+        </label>
+        <label>Adresse du client
+          <input type="text" id="clientAddress">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Informations document</legend>
+        <label>Numéro
+          <input type="text" id="docNumber" required>
+        </label>
+        <label>Date
+          <input type="date" id="docDate" required>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Prestations</legend>
+        <table id="items-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Quantité</th>
+              <th>Prix unitaire (€)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="items-body">
+            <!-- lignes ajoutées dynamiquement -->
+          </tbody>
+        </table>
+        <button type="button" id="add-item">+ Ajouter une ligne</button>
+      </fieldset>
+
+      <fieldset>
+        <legend>TVA</legend>
+        <label>Taux de TVA (%)
+          <input type="number" id="vatRate" value="0" min="0" step="0.1">
+        </label>
+        <p class="hint">Mets 0 si tu es en franchise en base de TVA (cas fréquent en auto-entreprise).</p>
+      </fieldset>
+
+      <div class="totals">
+        <p>Total HT : <span id="totalHT">0.00</span> €</p>
+        <p>TVA : <span id="totalVAT">0.00</span> €</p>
+        <p><strong>Total TTC : <span id="totalTTC">0.00</span> €</strong></p>
+      </div>
+
+      <button type="submit" id="generate-btn">Générer le PDF</button>
+    </form>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

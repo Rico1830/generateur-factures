@@ -1,0 +1,134 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f5f7;
+  margin: 0;
+  padding: 20px;
+  color: #222;
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+h1 {
+  margin-top: 0;
+  font-size: 1.5rem;
+}
+
+fieldset {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+}
+
+legend {
+  font-weight: bold;
+  padding: 0 6px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+label input[type="text"],
+label input[type="date"],
+label input[type="number"] {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+fieldset label[for] input,
+fieldset label input[type="radio"] {
+  display: inline;
+  width: auto;
+  margin-right: 6px;
+}
+
+fieldset label:has(input[type="radio"]) {
+  display: inline-block;
+  margin-right: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+
+th, td {
+  padding: 6px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+td input {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 4px 0 0;
+}
+
+.totals {
+  text-align: right;
+  font-size: 1rem;
+  margin-bottom: 16px;
+}
+
+.totals p {
+  margin: 4px 0;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 0.95rem;
+}
+
+#add-item {
+  background: #e0e0e0;
+}
+
+#generate-btn {
+  background: #2563eb;
+  color: #fff;
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+#generate-btn:hover {
+  background: #1d4ed8;
+}
+
+.remove-item {
+  background: #ef4444;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+}
